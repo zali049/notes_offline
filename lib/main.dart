@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_offline/screens/about_screen.dart';
 import 'package:notes_offline/screens/content_screen.dart';
 import 'package:notes_offline/screens/dashboard_screen.dart';
+import 'package:notes_offline/screens/edit_content_screen.dart';
 
 void main() {
   runApp(const MyApp());

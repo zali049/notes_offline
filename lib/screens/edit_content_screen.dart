@@ -4,20 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_offline/database/database.dart';
 
-class ContentScreen extends StatefulWidget {
-  const ContentScreen({super.key});
+class EditContentScreen extends StatefulWidget {
+  final int? args;
+  const EditContentScreen({super.key, required this.args});
 
   @override
-  State<ContentScreen> createState() => _ContentScreenState();
+  State<EditContentScreen> createState() => _EditContentScreenState();
 }
 
-class _ContentScreenState extends State<ContentScreen> {
+class _EditContentScreenState extends State<EditContentScreen> {
   final database = NoteDatabase();
-
+  Note? note;
+  String title = "";
+  String content = "";
 
   final TextEditingController _noteTitleController = TextEditingController();
   final TextEditingController _noteContentController = TextEditingController();
   String timeFormat = DateFormat('dd LLLL kk:mm').format(DateTime.now());
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    _noteTitleController.text = note!.title;
+    _noteContentController.text = note!.content;
+  }
+
 
   @override
   Widget build(BuildContext context) {
