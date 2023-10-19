@@ -5,8 +5,11 @@ import 'package:intl/intl.dart';
 import 'package:notes_offline/database/database.dart';
 
 class EditContentScreen extends StatefulWidget {
-  final int? args;
-  const EditContentScreen({super.key, required this.args});
+  final Note note;
+  const EditContentScreen({
+    super.key,
+    required this.note,
+  });
 
   @override
   State<EditContentScreen> createState() => _EditContentScreenState();
@@ -14,7 +17,6 @@ class EditContentScreen extends StatefulWidget {
 
 class _EditContentScreenState extends State<EditContentScreen> {
   final database = NoteDatabase();
-  Note? note;
   String title = "";
   String content = "";
 
@@ -22,15 +24,12 @@ class _EditContentScreenState extends State<EditContentScreen> {
   final TextEditingController _noteContentController = TextEditingController();
   String timeFormat = DateFormat('dd LLLL kk:mm').format(DateTime.now());
 
-
-
   @override
   void initState() {
     super.initState();
-    _noteTitleController.text = note!.title;
-    _noteContentController.text = note!.content;
+    _noteTitleController.text = widget.note.title;
+    _noteContentController.text = widget.note.content;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +60,24 @@ class _EditContentScreenState extends State<EditContentScreen> {
             Padding(
               padding: const EdgeInsets.all(8),
               child: IconButton(
-                onPressed: () {
-                  Navigator.pop(context, database.insertNotes(_noteTitleController.text, _noteContentController.text));
+                onPressed: () async {
+                  if (_noteTitleController.text.isEmpty ||
+                      _noteContentController.text.isEmpty) {
+                    return;
+                  }
+                  final result = await database.updateNotes(
+                    widget.note,
+                    _noteTitleController.text,
+                    _noteContentController.text,
+                  );
+                  if (result) {
+                    if (context.mounted) {
+                      Navigator.pop(
+                        context,
+                        true,
+                      );
+                    }
+                  }
                 },
                 icon: const Icon(Icons.save),
               ),

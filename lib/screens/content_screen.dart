@@ -14,7 +14,6 @@ class ContentScreen extends StatefulWidget {
 class _ContentScreenState extends State<ContentScreen> {
   final database = NoteDatabase();
 
-
   final TextEditingController _noteTitleController = TextEditingController();
   final TextEditingController _noteContentController = TextEditingController();
   String timeFormat = DateFormat('dd LLLL kk:mm').format(DateTime.now());
@@ -48,8 +47,21 @@ class _ContentScreenState extends State<ContentScreen> {
             Padding(
               padding: const EdgeInsets.all(8),
               child: IconButton(
-                onPressed: () {
-                  Navigator.pop(context, database.insertNotes(_noteTitleController.text, _noteContentController.text));
+                onPressed: () async {
+                  if (_noteTitleController.text.isEmpty ||
+                      _noteContentController.text.isEmpty) {
+                    return;
+                  }
+                  await database.insertNotes(
+                    _noteTitleController.text,
+                    _noteContentController.text,
+                  );
+
+                  if (context.mounted) {
+                    Navigator.pop(
+                      context,
+                    );
+                  }
                 },
                 icon: const Icon(Icons.save),
               ),

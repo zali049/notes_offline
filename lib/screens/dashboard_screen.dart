@@ -49,10 +49,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EditContentScreen(
-                                  args: snapshot.data![index].id,
+                                  note: snapshot.data![index],
                                 ),
                               ),
-                            );
+                            ).then((value) => setState(() {}));
                           });
                         },
                         title: Text(snapshot.data![index].title),
