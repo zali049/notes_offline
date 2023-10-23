@@ -1,11 +1,9 @@
-// ignore_for_file: prefer_typing_uninitialized_variables
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:notes_offline/database/database.dart';
 
 class EditContentScreen extends StatefulWidget {
   final Note note;
+
   const EditContentScreen({
     super.key,
     required this.note,
@@ -17,12 +15,9 @@ class EditContentScreen extends StatefulWidget {
 
 class _EditContentScreenState extends State<EditContentScreen> {
   final database = NoteDatabase();
-  String title = "";
-  String content = "";
 
   final TextEditingController _noteTitleController = TextEditingController();
   final TextEditingController _noteContentController = TextEditingController();
-  String timeFormat = DateFormat('dd LLLL kk:mm').format(DateTime.now());
 
   @override
   void initState() {
@@ -33,146 +28,126 @@ class _EditContentScreenState extends State<EditContentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.grey,
-        appBar: AppBar(
-          title: const Text("Notes"),
-          centerTitle: true,
-          backgroundColor: Colors.grey,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(5),
-            ),
-          ),
-          leading: InkWell(
-            onTap: () {
-              setState(() {
-                Navigator.pop(context);
-              });
-            },
-            child: const Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: IconButton(
-                onPressed: () async {
-                  if (_noteTitleController.text.isEmpty ||
-                      _noteContentController.text.isEmpty) {
-                    return;
-                  }
-                  final result = await database.updateNotes(
-                    widget.note,
-                    _noteTitleController.text,
-                    _noteContentController.text,
-                  );
-                  if (result) {
-                    if (context.mounted) {
-                      Navigator.pop(
-                        context,
-                        true,
-                      );
-                    }
-                  }
+    return Scaffold(
+       backgroundColor: Colors.grey.shade700,
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
+        child: Column(children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    Navigator.pop(
+                      context,
+                      true,
+                    );
+                  });
                 },
-                icon: const Icon(Icons.save),
-              ),
-            )
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                NoteTitle(_noteTitleController),
-                SizedBox(
-                  height: 20,
-                  child: Text(timeFormat.toString()),
+                padding: const EdgeInsets.all(0),
+                icon: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade800.withOpacity(.8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                  ),
                 ),
-                NoteContent(_noteContentController),
+              ),
+            ],
+          ),
+          Expanded(
+            child: ListView(
+              children: [
+                TextFormField(
+                  controller: _noteTitleController,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.all(0),
+                    counter: null,
+                    counterText: "",
+                    hintText: 'Title',
+                    hintStyle: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600,
+                      height: 1.5,
+                    ),
+                  ),
+                  maxLines: 1,
+                  maxLength: 31,
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    height: 1.5,
+                    color: Colors.white,
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                ),
+                TextFormField(
+                  controller: _noteContentController,
+                  maxLines: null,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.all(0),
+                    counter: null,
+                    counterText: "",
+                    hintText: 'Mulai menulis...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      height: 1.5,
+                    ),
+                  ),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    height: 1.5,
+                  ),
+                ),
               ],
             ),
-          ),
+          )
+        ]),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          if (_noteTitleController.text.isEmpty ||
+              _noteContentController.text.isEmpty) {
+            return;
+          }
+          final result = await database.updateNotes(
+            widget.note,
+            _noteTitleController.text,
+            _noteContentController.text,
+          );
+          if (result) {
+            if (context.mounted) {
+              Navigator.pop(
+                context,
+                true,
+              );
+            }
+          }
+        },
+        backgroundColor: Colors.grey.shade800,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-      ),
-    );
-  }
-}
-
-class NoteTitle extends StatelessWidget {
-  final _noteFieldController;
-
-  const NoteTitle(this._noteFieldController, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: _noteFieldController,
-      decoration: const InputDecoration(
-        border: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        errorBorder: InputBorder.none,
-        disabledBorder: InputBorder.none,
-        contentPadding: EdgeInsets.all(0),
-        counter: null,
-        counterText: "",
-        hintText: 'Title',
-        hintStyle: TextStyle(
-          fontSize: 21,
-          fontWeight: FontWeight.w600,
-          height: 1.5,
+        child: const Icon(
+          Icons.check,
+          size: 38,
         ),
-      ),
-      maxLines: 1,
-      maxLength: 31,
-      style: const TextStyle(
-        fontSize: 21,
-        fontWeight: FontWeight.bold,
-        height: 1.5,
-        color: Colors.black,
-      ),
-      textCapitalization: TextCapitalization.words,
-    );
-  }
-}
-
-class NoteContent extends StatelessWidget {
-  final _noteFieldController;
-
-  const NoteContent(this._noteFieldController, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: _noteFieldController,
-      maxLines: null,
-      textCapitalization: TextCapitalization.sentences,
-      decoration: const InputDecoration(
-        border: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        errorBorder: InputBorder.none,
-        disabledBorder: InputBorder.none,
-        contentPadding: EdgeInsets.all(0),
-        counter: null,
-        counterText: "",
-        hintText: 'Mulai menulis',
-        hintStyle: TextStyle(
-          fontSize: 14,
-          height: 1.5,
-        ),
-      ),
-      style: const TextStyle(
-        fontSize: 14,
-        height: 1.5,
       ),
     );
   }
