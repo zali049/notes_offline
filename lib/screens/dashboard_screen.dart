@@ -13,44 +13,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final database = NoteDatabase();
   final TextEditingController searchController = TextEditingController();
 
-  Future<List<Note>>? filteredNote;
   List<Note>? myData;
   List<Note>? unFiltered;
 
-  Future<List<Note>> loadData() async {
+  Future<void> loadData() async {
     List<Note> data = await database.getNotes();
     setState(() {
       myData = data;
       unFiltered = myData;
     });
-    return data;
   }
-
 
   onChangeSearch(String searchText) {
-    var  searchExist = searchText.isNotEmpty ? true : false;
-    if(searchExist) {
-      var filterData = [];
-
-      for(var i = 0; i < unFiltered!.length; i++){
-        String word = unFiltered![i].title;
-        if(word.contains(searchText)) {
-          filterData.add(unFiltered);
-        }
-      }
+    if (searchText != "") {
       setState(() {
-        myData = filterData.cast<Note>();
+        myData = myData!
+            .where((element) => element.title.contains(searchText))
+            .toList();
       });
     } else {
-      myData = unFiltered;
+      setState(() {
+        myData = unFiltered;
+      });
     }
   }
-
 
   @override
   void initState() {
     super.initState();
-    filteredNote = loadData();
+    loadData();
   }
 
   @override
@@ -97,7 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: const TextStyle(fontSize: 16, color: Colors.white),
                 decoration: InputDecoration(
                   contentPadding:
-                  const EdgeInsets.only(top: 12, bottom: 12, right: 12),
+                      const EdgeInsets.only(top: 12, bottom: 12, right: 12),
                   hintText: "Search notes....",
                   hintStyle: const TextStyle(color: Colors.grey),
                   prefixIcon: const Icon(Icons.search),
@@ -118,8 +109,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/content')
-              .then((value) => setState(() {}));
+          Navigator.pushNamed(context, '/content').then((value) => setState(() {
+                loadData();
+              }));
         },
         backgroundColor: Colors.grey.shade800,
         shape: RoundedRectangleBorder(
@@ -131,94 +123,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       backgroundColor: Colors.grey.shade700,
-      body: FutureBuilder<List<Note>>(
-        future: filteredNote,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            if (myData!.isNotEmpty) {
-              return ListView.builder(
-                itemCount: myData!.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8, top: 4),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      color: Colors.grey.shade800,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 4),
-                        child: ListTile(
-                          onTap: () {
-                            setState(() {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      EditContentScreen(
+      body: myData != null
+          ? myData!.isEmpty
+              ? const Center(
+                  child: Text(
+                    "Tidak ada catatan",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: () {
+                    return loadData();
+                  },
+                  child: ListView.builder(
+                    itemCount: myData!.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding:
+                            const EdgeInsets.only(left: 8, right: 8, top: 4),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          color: Colors.grey.shade800,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 4),
+                            child: ListTile(
+                              onTap: () {
+                                setState(() {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditContentScreen(
                                         note: myData![index],
                                       ),
-                                ),
-                              ).then((value) => setState(() {}));
-                            });
-                          },
-                          title: RichText(
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            text: TextSpan(
-                              text: '${myData![index].title}\n',
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w700),
-                              children: [
-                                TextSpan(
-                                  text: myData![index].content,
+                                    ),
+                                  ).then((value) => setState(() {
+                                        loadData();
+                                      }));
+                                });
+                              },
+                              title: RichText(
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                text: TextSpan(
+                                  text: '${myData![index].title}\n',
                                   style: const TextStyle(
-                                      fontSize: 12,
-                                      height: 2,
-                                      fontWeight: FontWeight.normal),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700),
+                                  children: [
+                                    TextSpan(
+                                      text: myData![index].content,
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          height: 2,
+                                          fontWeight: FontWeight.normal),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          trailing: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                database.deleteNotes(myData![index].id);
-                              });
-                            },
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.white,
+                              ),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    database.deleteNotes(myData![index].id);
+                                    loadData();
+                                  });
+                                },
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            } else {
-              return const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: Text(
-                      "Tidak ada catatan",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                      );
+                    },
                   ),
-                ],
-              );
-            }
-          }
-        },
-      ),
+                )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }
