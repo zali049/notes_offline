@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notes_offline/database/database.dart';
 import 'package:notes_offline/screens/edit_content_screen.dart';
 
@@ -15,6 +16,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Note>? myData;
   List<Note>? unFiltered;
+  bool sorted = false;
 
   Future<void> loadData() async {
     List<Note> data = await database.getNotes();
@@ -24,11 +26,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  List<Note> onSorted(List<Note> notes){
+    if(sorted) {
+      setState(() {
+        notes.sort((a,b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+      });
+    } else {
+      setState(() {
+        notes.sort((b,a) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+      });
+    }
+    setState(() {
+      sorted = !sorted;
+    });
+    return notes;
+  }
+
   onChangeSearch(String searchText) {
     if (searchText != "") {
       setState(() {
         myData = myData!
-            .where((element) => element.title.contains(searchText))
+            .where((element) => element.title.toLowerCase().contains(searchText))
             .toList();
       });
     } else {
@@ -48,6 +66,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.grey.shade800,
+          statusBarBrightness: Brightness.light,
+          statusBarIconBrightness: Brightness.light,
+        ),
         title: const Text("Notes"),
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.bold,
@@ -64,7 +87,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.only(right: 8),
             child: InkWell(
               focusColor: Colors.grey.shade500.withOpacity(.8),
-              onTap: () {},
+              onTap: () {
+                setState(() {
+                  myData = onSorted(myData!);
+                });
+              },
               highlightColor: Colors.grey.shade500.withOpacity(.8),
               borderRadius: BorderRadius.circular(10),
               child: const Padding(
