@@ -86,21 +86,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         actions: [
+          InkWell(
+            focusColor: Colors.grey.shade500.withOpacity(.8),
+            onTap: () {
+              setState(() {
+                myData = onSorted(myData!);
+              });
+            },
+            highlightColor: Colors.grey.shade500.withOpacity(.8),
+            borderRadius: BorderRadius.circular(10),
+            child: const Padding(
+              padding: EdgeInsets.all(20),
+              child: Icon(
+                Icons.sort,
+                size: 20,
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: InkWell(
               focusColor: Colors.grey.shade500.withOpacity(.8),
               onTap: () {
-                setState(() {
-                  myData = onSorted(myData!);
-                });
+               Navigator.pushNamed(context, '/about');
               },
               highlightColor: Colors.grey.shade500.withOpacity(.8),
               borderRadius: BorderRadius.circular(10),
               child: const Padding(
                 padding: EdgeInsets.all(20),
                 child: Icon(
-                  Icons.sort,
+                  Icons.info_sharp,
                   size: 20,
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notes_offline/screens/about_screen.dart';
 import 'package:notes_offline/screens/content_screen.dart';
 import 'package:notes_offline/screens/dashboard_screen.dart';
 
@@ -21,6 +22,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/dashboard': (context) => const DashboardScreen(),
         '/content': (context) => const ContentScreen(),
+        '/about': (context) => const AboutScreen(),
+
       },
     );
   }
