@@ -26,14 +26,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  List<Note> onSorted(List<Note> notes){
-    if(sorted) {
+  List<Note> onSorted(List<Note> notes) {
+    if (sorted) {
       setState(() {
-        notes.sort((a,b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        notes.sort(
+            (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
       });
     } else {
       setState(() {
-        notes.sort((b,a) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        notes.sort(
+            (b, a) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
       });
     }
     setState(() {
@@ -46,7 +48,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (searchText != "") {
       setState(() {
         myData = myData!
-            .where((element) => element.title.toLowerCase().contains(searchText))
+            .where(
+                (element) => element.title.toLowerCase().contains(searchText))
             .toList();
       });
     } else {
@@ -213,8 +216,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               trailing: IconButton(
                                 onPressed: () {
                                   setState(() {
-                                    database.deleteNotes(myData![index].id);
-                                    loadData();
+                                    AlertDialog alert = AlertDialog(
+                                      title: const Text(
+                                        'Hapus Catatan?',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      backgroundColor: Colors.grey.shade700,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      contentPadding: const EdgeInsets.all(8),
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              Navigator.pop(
+                                                context,
+                                                true,
+                                              );
+                                            });
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey,
+                                          ),
+                                          child: const Text(
+                                            'Batal',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              database.deleteNotes(
+                                                  myData![index].id);
+                                              Navigator.pop(context, true);
+                                              loadData();
+                                            });
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                          ),
+                                          child: const Text('Hapus'),
+                                        ),
+                                      ],
+                                    );
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => alert);
+                                    return;
                                   });
                                 },
                                 icon: const Icon(
